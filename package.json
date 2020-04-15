@@ -1,0 +1,16 @@
+{
+  "name": "express-test",
+  "version": "1.0.0",
+  "description": "TEST!!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Aaron Yao-Smith",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "googleapis": "^48.0.0",
+    "jwt-decode": "^2.2.0"
+  }
+}
