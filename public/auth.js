@@ -123,7 +123,8 @@ var onSuccess = function(googleUser) {
     xhr.open('POST', 'http://lvh.me:5000/signin');
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.onload = function() {
-	console.log('Signed in as: ' + xhr.responseText);
+	console.log('Redirecting to signup page');
+	window.location.replace('http://lvh.me:5000/signup?email=' + xhr.responseText);
     };
     xhr.send('idtoken=' + id_token);
 }

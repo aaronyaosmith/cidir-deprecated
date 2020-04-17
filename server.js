@@ -34,12 +34,15 @@ app.post('/signin', async function(request, response) {
     });
     const payload = ticket.getPayload();
     const userid = payload['sub'];
-    const email = payload['email'];
     // If request specified a G Suite domain:
     //const domain = payload['hd'];
-    console.log('Verified user ' + email);
-    response.send(userid + " " + email);
+    console.log('Verified user ' + payload['name'] + ' ' + payload['email']);
+    response.send(payload['email']);
 });
+
+app.get('/signup', async function(request, response) {
+    response.send('hello, ' + request.query.email + ': Sign up for a new CIDir profile! form below')
+})
 
 
 
