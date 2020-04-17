@@ -1,6 +1,7 @@
+const CLIENT_ID = "310338910105-10po2o9vkr9hmu82r95oafnod06u9vej.apps.googleusercontent.com";
+
 var auth2; // The Sign-In object.
 var googleUser; // The current user.
-
 
 /**
  * Calls startAuth after Sign in V2 finishes setting up.
@@ -15,7 +16,7 @@ var appStart = function() {
  */
 var initSigninV2 = function() {
     auth2 = gapi.auth2.init({
-	client_id: '310338910105-n7o4orobs4o30n9jjsb40pnsfhe46ijq.apps.googleusercontent.com',
+	client_id: CLIENT_ID,
 	scope: 'profile'
     });
 
@@ -116,7 +117,15 @@ var renderButton = function () {
 }
 
 var onSuccess = function(googleUser) {
-    console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+    var id_token = googleUser.getAuthResponse().id_token;
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'http://lvh.me:5000/signin');
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function() {
+	console.log('Signed in as: ' + xhr.responseText);
+    };
+    xhr.send('idtoken=' + id_token);
 }
 var onFailure = function(error) {
     console.log(error);

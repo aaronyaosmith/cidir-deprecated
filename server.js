@@ -1,22 +1,11 @@
-// OAuth
-// Client ID 310338910105-n7o4orobs4o30n9jjsb40pnsfhe46ijq.apps.googleusercontent.com
-// Client Secret 59E93GQE5Z9jNN-fyJTQKCvx
-
-
 const {google} = require('googleapis');
 const express = require('express');
 const jwtDecode = require('jwt-decode');
 
 const PORT = 5000;
-const CLIENT_ID = '310338910105-n7o4orobs4o30n9jjsb40pnsfhe46ijq.apps.googleusercontent.com'
-const CLIENT_SECRET = '59E93GQE5Z9jNN-fyJTQKCvx'
+const CLIENT_ID = process.env.CLIENT_ID;
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
 
-
-const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, 'http://lvh.me:5000');
-const url = oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: ['openid', 'profile', 'email']
-});
 
 const app = express();
 
@@ -30,20 +19,30 @@ const timeLogger = (request, response, next) => {
     next();
 };
 
-// add these callbacks to all handlers
-app.use(urlLogger, timeLogger);
+const client = new google.auth.OAuth2(CLIENT_ID);
 
-app.get('/', async function(request, response) {
-    if (typeof request.query.code === 'undefined') {
-	response.send('WELCOME TO CTAS<br /><a href=' + url + '>Login</a>');
-    } else {
-	let {tokens} = await oauth2Client.getToken(request.query.code);
-	oauth2Client.setCredentials(tokens);
-	let profile = jwtDecode(tokens.id_token);
-	response.send('WELCOME TO CTAS, ' + profile.email + '!<br /><a href=http://lvh.me:5000>Logout</a>');
-    }
+app.use(urlLogger, timeLogger);
+app.use(express.static('public'));
+app.use(express.urlencoded(type='application/x-www-form-urlencoded'));
+
+app.get('/', function (req, res) {});
+
+app.post('/signin', async function(request, response) {
+    const ticket = await client.verifyIdToken({
+	idToken: request.body.idtoken,
+	audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+    });
+    const payload = ticket.getPayload();
+    const userid = payload['sub'];
+    const email = payload['email'];
+    // If request specified a G Suite domain:
+    //const domain = payload['hd'];
+    console.log('Verified user ' + email);
+    response.send(userid + " " + email);
 });
 
+
+
 let server = app.listen(PORT, () => {
-    console.log('Express intro running on localhost:' + PORT);
+    console.log('Listening on localhost:' + PORT);
 });
