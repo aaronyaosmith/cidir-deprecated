@@ -23,27 +23,33 @@ const client = new google.auth.OAuth2(CLIENT_ID);
 
 app.use(urlLogger, timeLogger);
 app.use(express.static('public'));
-app.use(express.urlencoded(type='application/x-www-form-urlencoded'));
+app.use(express.urlencoded({
+    extended: true,
+    type: 'application/x-www-form-urlencoded'
+}));
 
 app.get('/', function (req, res) {});
 
-app.post('/signin', async function(request, response) {
+let getSessionToken = async function (googleToken) {
     const ticket = await client.verifyIdToken({
 	idToken: request.body.idtoken,
-	audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+	// Specify the CLIENT_ID of the app that accesses the backend
+	audience: CLIENT_ID,
     });
     const payload = ticket.getPayload();
     const userid = payload['sub'];
     // If request specified a G Suite domain:
     //const domain = payload['hd'];
     console.log('Verified user ' + payload['name'] + ' ' + payload['email']);
-    response.send(payload['email']);
+    return payload(['email']);
+};
+
+app.get('/auth', async function(request, response) {
+    const googleToken = request.body.googleToken;
+    const cookie = getSessionToken(googleToken);
+    // send cookie placeholder
+    response.send('heres your cookie: ' + cookie);
 });
-
-app.get('/signup', async function(request, response) {
-    response.send('hello, ' + request.query.email + ': Sign up for a new CIDir profile! form below')
-})
-
 
 
 let server = app.listen(PORT, () => {
